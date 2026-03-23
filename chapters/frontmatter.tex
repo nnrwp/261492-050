@@ -3,23 +3,38 @@
 
 \ifproject
 \begin{abstractTH}
-เขียนบทคัดย่อของโครงงานที่นี่
+โครงงานนี้นำเสนอการพัฒนาระบบวัดความสูงของต้นไม้โดยใช้เทคโนโลยี Ultra-Wideband (UWB) ร่วมกับแพลตฟอร์มโดรน 
+โดยมีวัตถุประสงค์เพื่อศึกษาความเป็นไปได้ในการใช้ UWB เป็นทางเลือกแทนเทคโนโลยีที่มีต้นทุนสูง เช่น LiDAR 
+และการประมวลผลภาพถ่ายทางอากาศ
 
-การเขียนรายงานเป็นส่วนหนึ่งของการทำโครงงานวิศวกรรมคอมพิวเตอร์
-เพื่อทบทวนทฤษฎีที่เกี่ยวข้อง อธิบายขั้นตอนวิธีแก้ปัญหาเชิงวิศวกรรม และวิเคราะห์และสรุปผลการทดลองอุปกรณ์และระบบต่างๆ
-\enskip อย่างไรก็ดี การสร้างรูปเล่มรายงานให้ถูกรูปแบบนั้นเป็นขั้นตอนที่ยุ่งยาก
-แม้ว่าจะมีต้นแบบสำหรับใช้ในโปรแกรม Microsoft Word แล้วก็ตาม
-แต่นักศึกษาส่วนใหญ่ยังคงค้นพบว่าการใช้งานมีความซับซ้อน และเกิดความผิดพลาดในการจัดรูปแบบ กำหนดเลขหัวข้อ และสร้างสารบัญอยู่
-\enskip ภาควิชาวิศวกรรมคอมพิวเตอร์จึงได้จัดทำต้นแบบรูปเล่มรายงานโดยใช้ระบบจัดเตรียมเอกสาร
-\LaTeX{} เพื่อช่วยให้นักศึกษาเขียนรายงานได้อย่างสะดวกและรวดเร็วมากยิ่งขึ้น
+ระบบที่พัฒนาขึ้นประกอบด้วยอุปกรณ์ UWB ประเภท Tag ที่ติดตั้งบนโดรน และ Anchor ที่ติดตั้งบนพื้นดิน 
+โดยใช้หลักการ Time of Flight (ToF) ในการคำนวณระยะระหว่างอุปกรณ์ เพื่อนำไปประมาณความสูงของต้นไม้ 
+ข้อมูลที่ได้จากการวัดจะถูกบันทึกและประมวลผลด้วยโปรแกรมที่พัฒนาด้วยภาษา Python
+
+การทดลองดำเนินการในพื้นที่ป่าจริง โดยใช้ต้นไม้จำนวน 3 ต้นเป็นกรณีศึกษา 
+ผลการทดลองถูกนำไปเปรียบเทียบกับข้อมูลอ้างอิงจาก 3D Point Cloud เพื่อประเมินความถูกต้องของระบบ 
+โดยทำการวิเคราะห์ค่าความคลาดเคลื่อนและความสม่ำเสมอของการวัด
+
+ผลการศึกษาแสดงให้เห็นว่า ระบบ UWB สามารถใช้วัดความสูงของต้นไม้ได้ในระดับที่น่าพอใจ 
+อย่างไรก็ตาม ความแม่นยำของการวัดอาจได้รับผลกระทบจากสภาพแวดล้อม เช่น การบังของพุ่มไม้และความไม่เสถียรของสัญญาณ 
+ซึ่งเป็นข้อจำกัดที่ควรพิจารณาในการนำไปใช้งานจริง
 \end{abstractTH}
 
 \begin{abstract}
-The abstract would be placed here. It usually does not exceed 350 words
-long (not counting the heading), and must not take up more than one (1) page
-(even if fewer than 350 words long).
+This project presents the development of a tree height measurement system using Ultra-Wideband (UWB) technology integrated with a drone platform. 
+The objective is to investigate the feasibility of using UWB as a cost-effective alternative to conventional methods such as LiDAR and photogrammetry.
 
-Make sure your abstract sits inside the \texttt{abstract} environment.
+The proposed system consists of a UWB tag mounted on a drone and an anchor placed on the ground. 
+The distance between devices is calculated using the Time of Flight (ToF) principle and used to estimate tree height. 
+Measurement data are collected and processed using a Python-based application.
+
+Experiments were conducted in a real forest environment using three sample trees. 
+The results were compared with reference data obtained from a 3D point cloud to evaluate system accuracy. 
+Error and consistency analyses were performed to assess measurement reliability.
+
+The results indicate that the UWB-based system can provide a reasonable estimation of tree height. 
+However, measurement accuracy is affected by environmental factors such as signal obstruction from foliage and signal instability, 
+which should be considered for practical deployment.
 \end{abstract}
 
 \iffalse
@@ -31,10 +46,17 @@ Dedication page is optional.
 \fi % \iffalse
 
 \begin{acknowledgments}
-Your acknowledgments go here. Make sure it sits inside the
-\texttt{acknowledgment} environment.
+ขอขอบพระคุณอาจารย์ที่ปรึกษาโครงงาน ผศ.ดร.กำพล วรดิษฐ์ และคณะกรรมการ รศ.ดร.ศันสนีย์ เอื้อพันธ์วิริยะกุล และ รศ.ดร.อัญญา อาภาวัชรุตม์ 
+ที่ได้ให้คำแนะนำและข้อเสนอแนะอันเป็นประโยชน์ต่อการดำเนินโครงงานนี้ 
 
-\acksign{2020}{5}{25}
+ขอขอบคุณผู้ให้คำแนะนำในการเลือกใช้อุปกรณ์ ESP32 UWB ซึ่งเป็นส่วนสำคัญในการพัฒนาระบบ
+
+ขอขอบคุณผู้จัดทำชิ้นส่วน 3D Print สำหรับติดตั้งอุปกรณ์บนโดรน ซึ่งช่วยให้การติดตั้งมีความเหมาะสมและปลอดภัย
+
+ขอขอบคุณผู้ให้คำแนะนำในการใช้งานระบบ WebODM และการประมวลผลข้อมูล 3D Point Cloud ซึ่งมีส่วนสำคัญต่อการวิเคราะห์ผลการทดลอง
+
+สุดท้ายนี้ ขอขอบคุณภาควิชาวิศวกรรมคอมพิวเตอร์ ที่ได้สนับสนุนทรัพยากรและอุปกรณ์ที่จำเป็นสำหรับการศึกษาและการทดลอง
+\acksign{2026}{3}{27}
 \end{acknowledgments}%
 \fi % \ifproject
 
