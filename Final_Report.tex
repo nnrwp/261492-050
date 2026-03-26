@@ -73,6 +73,16 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows, positioning}
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible
+}
+
 \begin{document}
 \include{chapters/frontmatter}
 
@@ -101,11 +111,22 @@
 \ifindex\indexpage\fi
 
 \begin{biosketch}
+
+\begin{center}
+  \includegraphics[width=1.5in]{fig/rawipa.png}
+\end{center}
+\textbf{ชื่อ-นามสกุล:} นางสาวรวิภา สามห้วย \\
+\textbf{รหัสนักศึกษา:} 650610801 \\
+\textbf{การศึกษา:} ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่ \\
+\\
+\\
 \begin{center}
   \includegraphics[width=1.5in]{fig/mugshot.jpg}
 \end{center}
-Your biosketch goes here. Make sure it sits inside
-the \texttt{biosketch} environment.
+\textbf{ชื่อ-นามสกุล:} นางสาววาสิรี นันทจันทร์ \\
+\textbf{รหัสนักศึกษา:} 650610807 \\
+\textbf{การศึกษา:} ปริญญาตรี สาขาวิศวกรรมคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเชียงใหม่
+
 \end{biosketch}
 \fi % \ifproject
 \end{document}
