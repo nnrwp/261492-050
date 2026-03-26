@@ -19,79 +19,175 @@
 % \titleformat{\section}{\normalfont\bfseries}{\thesection}{1em}{}
 % \titlespacing*{\section}{0pt}{10ex}{0pt}
 
-\section{Alice in Wonderland}
+\section{ภาพรวมระบบ (System Overview)}
+ระบบที่พัฒนาขึ้นมีวัตถุประสงค์เพื่อวัดความสูงของต้นไม้ โดยอาศัยการผสานเทคโนโลยี Ultra-Wideband (UWB) ร่วมกับอากาศยานไร้คนขับ (UAV) และการประมวลผลภาพถ่ายทางอากาศเพื่อสร้างแบบจำลองสามมิติ (3D Reconstruction) ซึ่งใช้เป็นค่ามาตรฐานอ้างอิงในการประเมินความแม่นยำของระบบ
 
-\begin{figure}
-\begin{center}
-\includegraphics{fig/800px-Briny_Beach.jpg}
-\end{center}
-\caption[Poem]{The Walrus and the Carpenter}
-\label{fig:walrus}
+\subsection{ภาพรวมการทำงานของระบบ}
+ระบบแบ่งการทำงานออกเป็น 2 กระบวนการหลัก ได้แก่ (1) การวัดระยะด้วย UWB ร่วมกับเซ็นเซอร์ VPS และ (2) การสร้างแบบจำลองสามมิติจากภาพถ่ายทางอากาศ
+
+ในกระบวนการที่หนึ่ง อุปกรณ์ Tag ที่ติดตั้งบนโดรนจะสื่อสารกับ Anchor บนพื้นดินเพื่อวัดระยะทางด้วยเทคนิค Time of Flight (ToF) ขณะที่โดรนลอยตัวเหนือยอดไม้ โดยใช้เซ็นเซอร์ VPS วัดระยะจากโดรนถึงยอดไม้ จากนั้นนำค่าที่ได้มาคำนวณความสูงของต้นไม้
+
+ในกระบวนการที่สอง โดรนจะเก็บภาพถ่ายทางอากาศของพื้นที่เป้าหมายในช่วงเวลาที่ใกล้เคียงกัน แล้วนำไปประมวลผลด้วย WebODM เพื่อสร้าง 3D Point Cloud และแบบจำลอง DSM/DTM ซึ่งใช้คำนวณความสูงของต้นไม้ (CHM) เพื่อเป็นค่ามาตรฐานอ้างอิง
+
+\subsection{องค์ประกอบของระบบ}
+ระบบประกอบด้วยองค์ประกอบหลัก 4 ส่วน ได้แก่
+\begin{itemize}
+    \item \textbf{ระบบ UWB:} ใช้วัดระยะระหว่าง Tag บนโดรน และ Anchor บนพื้นดิน
+    \item \textbf{อากาศยานไร้คนขับ (UAV):} ใช้สำหรับติดตั้ง Tag ควบคุมตำแหน่ง และเก็บภาพถ่าย
+    \item \textbf{สถานีภาคพื้น:} รวบรวมข้อมูลจากระบบ UWB ทำการจัดรูปแบบข้อมูล และบันทึกลงไฟล์ CSV เพื่อใช้ในการวิเคราะห์และเปรียบเทียบผล
+    \item \textbf{ระบบประมวลผลภาพ:} ใช้ WebODM สำหรับสร้างแบบจำลองสามมิติ
+\end{itemize}
+
+\subsection{การไหลของข้อมูล (Data Flow)}
+การทำงานของระบบมีลักษณะเป็นการประมวลผลแบบขนาน (Parallel Processing) โดยสามารถแบ่งออกเป็น 2 กระบวนการหลัก ได้แก่ การวัดระยะด้วยเทคโนโลยี UWB ร่วมกับเซ็นเซอร์ VPS และการสร้างแบบจำลองสามมิติจากภาพถ่ายทางอากาศ ซึ่งมีรายละเอียดดังนี้
+
+\begin{enumerate}
+    \item \textbf{กระบวนการวัดระยะด้วย UWB และ VPS}
+    \begin{itemize}
+        \item วัดระยะในแนวดิ่งจากตัวโดรนถึงยอดไม้โดยใช้เซ็นเซอร์ Vision Positioning System (VPS)
+        \item วัดระยะห่างระหว่างอุปกรณ์ Tag และ Anchor โดยใช้เทคนิค Time of Flight (ToF) โดยรักษาระดับความสูงเดิมและปรับตำแหน่งในแนวราบเพื่อหลีกเลี่ยงการบังสัญญาณ
+        \item นำค่าระยะทางที่ได้มาคำนวณเพื่อประมาณค่าความสูงของต้นไม้
+        \item บันทึกข้อมูลระยะทางและผลการคำนวณในรูปแบบไฟล์ CSV เพื่อใช้ในการวิเคราะห์ภายหลัง
+    \end{itemize}
+
+    \item \textbf{กระบวนการสร้างแบบจำลองสามมิติ}
+    \begin{itemize}
+        \item เก็บภาพถ่ายทางอากาศของพื้นที่เป้าหมาย
+        \item นำภาพถ่ายที่ได้ไปประมวลผลด้วยซอฟต์แวร์ WebODM
+        \item สร้างแบบจำลองสามมิติในรูปแบบ 3D Point Cloud รวมถึงแบบจำลองความสูงเชิงเลข (DSM และ DTM)
+        \item คำนวณค่าความสูงของต้นไม้จากข้อมูลแบบจำลอง (Canopy Height Model: CHM)
+    \end{itemize}
+
+    \item นำค่าความสูงของต้นไม้ที่ได้จากทั้งสองกระบวนการมาเปรียบเทียบกัน โดยใช้ค่าที่ได้จากแบบจำลองสามมิติ (3D Point Cloud) เป็นค่ามาตรฐานอ้างอิง เพื่อประเมินความแม่นยำของระบบ
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.95\textwidth}{!}{
+  \begin{tikzpicture}[node distance=1.6cm and 3cm]
+
+  % styles
+  \tikzstyle{process} = [rectangle, minimum width=4.5cm, minimum height=1cm, text centered, align=center, draw=black]
+  \tikzstyle{startstop} = [ellipse, minimum width=3.5cm, minimum height=1cm, text centered, draw=black]
+  \tikzstyle{arrow} = [thick,->,>=stealth]
+
+  % start
+  \node (start) [startstop] {Start System};
+
+  % split
+  \node (split) [process, below of=start] {เริ่มการเก็บข้อมูล};
+
+  % LEFT PIPELINE (UWB)
+  \node (uwb1) [process, below left=of split] {วัดระยะจากโดรนถึงยอดไม้ (VPS)};
+  \node (uwb2) [process, below of=uwb1] {วัดระยะด้วย UWB (Tag-Anchor)};
+  \node (uwb3) [process, below of=uwb2] {คำนวณความสูงต้นไม้ \\ (ผลต่างระหว่างระยะ UWB และ VPS)};
+
+  % RIGHT PIPELINE (Photogrammetry)
+  \node (img1) [process, below right=of split] {เก็บภาพถ่ายทางอากาศ};
+  \node (img2) [process, below of=img1] {ประมวลผลด้วย WebODM \\ (3D Point Cloud / DSM / DTM)};
+  \node (img3) [process, below of=img2] {คำนวณความสูงต้นไม้ \\ จาก Point Cloud};
+
+  % merge
+  \node (compare) [process, below=7cm of split] {เปรียบเทียบค่าความสูง \\ (UWB vs 3D Model)};
+  \node (end) [startstop, below of=compare] {End};
+
+  % arrows
+  \draw [arrow] (start) -- (split);
+
+  \draw [arrow] (split) -| (uwb1);
+  \draw [arrow] (uwb1) -- (uwb2);
+  \draw [arrow] (uwb2) -- (uwb3);
+  \draw [arrow] (uwb3) |- (compare);
+
+  \draw [arrow] (split) -| (img1);
+  \draw [arrow] (img1) -- (img2);
+  \draw [arrow] (img2) -- (img3);
+  \draw [arrow] (img3) |- (compare);
+
+  \draw [arrow] (compare) -- (end);
+
+  \end{tikzpicture}
+  }
+  \caption{แผนภาพกระบวนการทำงานแบบขนานสำหรับการประมาณความสูงของต้นไม้โดยใช้ UWB และโฟโตแกรมเมทรี}
+  \label{fig:parallel-system}
 \end{figure}
 
-\subsection{The Black Kitten}
-  One thing was certain, that the WHITE kitten had had nothing to
-do with it:---it was the black kitten's fault entirely~\cite{aiw}.  For the
-white kitten had been having its face washed by the old cat for
-the last quarter of an hour (and bearing it pretty well,
-considering); so you see that it COULDN'T have had any hand in
-the mischief.
+\subsection{ข้อจำกัดของระบบ (System Limitations)}
+แม้ว่าระบบจะถูกออกแบบมาเพื่อให้มีความแม่นยำสูง แต่ยังมีข้อจำกัดบางประการ ได้แก่
+\begin{itemize}
+    \item ความคลาดเคลื่อนจากการจัดตำแหน่งโดรนให้ตรงกับ Anchor ในแนวดิ่ง
+    \item ผลกระทบจากสภาพแวดล้อม เช่น ความหนาแน่นของต้นไม้ ซึ่งอาจทำให้เกิดสัญญาณสะท้อน (Multipath) หรือสภาวะ Non-Line-of-Sight (NLOS)
+    \item ความไม่เสถียรของโดรนขณะลอยตัว ซึ่งอาจส่งผลต่อความคลาดเคลื่อนของค่าระยะทางที่วัดได้
+    \item ความคลาดเคลื่อนของแบบจำลอง 3 มิติที่ใช้เป็นค่ามาตรฐานอ้างอิง
+\end{itemize}
 
-  The way Dinah washed her children's faces was this:  first she
-held the poor thing down by its ear with one paw, and then with
-the other paw she rubbed its face all over, the wrong way,
-beginning at the nose:  and just now, as I said, she was hard at
-work on the white kitten, which was lying quite still and trying
-to purr---no doubt feeling that it was all meant for its good.
+\section{โครงสร้างฮาร์ดแวร์ของระบบ}
+\begin{enumerate}
+    \item \textbf{ESP32 UWB:} ทำหน้าที่เป็นอุปกรณ์ Tag และ Anchor สำหรับการวัดระยะทาง โดยอาศัยหลักการ Time of Flight (ToF) ในการคำนวณระยะห่างระหว่างอุปกรณ์ ซึ่งค่าระยะทางที่ได้จะถูกนำไปใช้ในการคำนวณความสูงของต้นไม้
+    \item \textbf{โดรน DJI M30T:} ใช้เป็นแพลตฟอร์มสำหรับติดตั้งโมดูล UWB และควบคุมตำแหน่งให้ลอยตัวเหนือยอดต้นไม้ นอกจากนี้ยังใช้เซ็นเซอร์ของโดรนในการวัดระยะจากตัวโดรนถึงยอดไม้ (VPS) และใช้กล้องสำหรับบันทึกภาพถ่ายทางอากาศ รวมถึงการปรับตำแหน่งในแนวราบเพื่อดำเนินการวัดระยะด้วย UWB
+    \item \textbf{Laptop Computer:} ใช้เป็นสถานีภาคพื้นสำหรับรับข้อมูลจากอุปกรณ์ UWB ทำการจัดรูปแบบและบันทึกข้อมูล รวมถึงประมวลผลข้อมูลเพื่อคำนวณความสูงของต้นไม้
+    \item \textbf{โครงยึดอุปกรณ์ (3D Printing):} ใช้สำหรับติดตั้งโมดูล UWB Tag บนโดรน โดยออกแบบให้มีน้ำหนักเบา มีความแข็งแรง และไม่รบกวนการทำงานของเซ็นเซอร์หรือกล้องของโดรน
+\end{enumerate}
 
-  But the black kitten had been finished with earlier in the
-afternoon, and so, while Alice was sitting curled up in a corner
-of the great arm-chair, half talking to herself and half asleep,
-the kitten had been having a grand game of romps with the ball of
-worsted Alice had been trying to wind up, and had been rolling it
-up and down till it had all come undone again; and there it was,
-spread over the hearth-rug, all knots and tangles, with the
-kitten running after its own tail in the middle.
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/3D+Drone.png}
+        \small (a) โครงยึดอุปกรณ์ก่อนติดตั้งโมดูล UWB
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/3D+UWB.png}
+        \small (b) การติดตั้งโมดูล UWB บนโดรน
+    \end{minipage}
 
-\subsection{The Reproach}
+    \caption{ขั้นตอนการติดตั้งโมดูล UWB บนโดรน}
+    \label{fig:uwb-installation}
+\end{figure}
 
-  `Oh, you wicked little thing!' cried Alice, catching up the
-kitten, and giving it a little kiss to make it understand that it
-was in disgrace.  `Really, Dinah ought to have taught you better
-manners!  You OUGHT, Dinah, you know you ought!' she added,
-looking reproachfully at the old cat, and speaking in as cross a
-voice as she could manage---and then she scrambled back into the
-arm-chair, taking the kitten and the worsted with her, and began
-winding up the ball again.  But she didn't get on very fast, as
-she was talking all the time, sometimes to the kitten, and
-sometimes to herself.  Kitty sat very demurely on her knee,
-pretending to watch the progress of the winding, and now and then
-putting out one paw and gently touching the ball, as if it would
-be glad to help, if it might.
+\section{โครงสร้างซอฟต์แวร์ของระบบ}
+\begin{enumerate}
+    \item \textbf{UWB Program:} เป็นโปรแกรมที่พัฒนาบน ESP32 สำหรับควบคุมการทำงานของโมดูล UWB ในการวัดระยะทางระหว่าง Tag และ Anchor รวมถึงการส่งข้อมูลระยะทางไปยังระบบบันทึกข้อมูล
+    \item \textbf{Data Logging (CSV):} ใช้สำหรับบันทึกข้อมูลที่ได้จากการวัด เช่น ระยะทางจาก UWB และข้อมูลจากโดรน โดยทำการจัดรูปแบบข้อมูลตามลำดับเวลา และบันทึกในรูปแบบไฟล์ CSV เพื่อใช้ในการวิเคราะห์
+    \item \textbf{WebODM:} ใช้สำหรับประมวลผลภาพถ่ายทางอากาศจากโดรน เพื่อสร้างแบบจำลองสามมิติ (3D Model) และข้อมูล Point Cloud สำหรับใช้ในการคำนวณความสูงของต้นไม้
+\end{enumerate}
 
-  `Do you know what to-morrow is, Kitty?' Alice began.  `You'd
-have guessed if you'd been up in the window with me---only Dinah
-was making you tidy, so you couldn't.  I was watching the boys
-getting in stick for the bonfire---and it wants plenty of
-sticks, Kitty!  Only it got so cold, and it snowed so, they had
-to leave off.  Never mind, Kitty, we'll go and see the bonfire
-to-morrow.'  Here Alice wound two or three turns of the worsted
-round the kitten's neck, just to see how it would look:  this led
-to a scramble, in which the ball rolled down upon the floor, and
-yards and yards of it got unwound again.
+\section{ขั้นตอนการดำเนินงาน (Workflow)}
 
-  `Do you know, I was so angry, Kitty,' Alice went on as soon as
-they were comfortably settled again, `when I saw all the mischief
-you had been doing, I was very nearly opening the window, and
-putting you out into the snow!  And you'd have deserved it, you
-little mischievous darling!  What have you got to say for
-yourself?  Now don't interrupt me!' she went on, holding up one
-finger.  `I'm going to tell you all your faults.  Number one:
-you squeaked twice while Dinah was washing your face this
-morning.  Now you can't deny it, Kitty:  I heard you!  What that
-you say?' (pretending that the kitten was speaking.)  `Her paw
-went into your eye?  Well, that's YOUR fault, for keeping your
-eyes open---if you'd shut them tight up, it wouldn't have
-happened.  Now don't make any more excuses, but listen!  Number
-two:  you pulled Snowdrop away by the tail just as I had put down
-the saucer of milk before her!  What, you were thirsty, were you?
+การดำเนินงานของระบบในการทดลองภาคสนามสามารถอธิบายได้ตามลำดับขั้นตอนดังนี้
+
+\begin{enumerate}
+    \item ใช้โดรนบินเก็บภาพถ่ายทางอากาศของพื้นที่เพื่อใช้ในการสร้างแบบจำลองสามมิติ
+    \item ทำการติดตั้ง Anchor บนพื้นดินใต้ต้นไม้เป้าหมาย และเตรียมระบบรับข้อมูล
+    \item นำโดรนลงจอดและติดตั้งโมดูล UWB Tag บนโครงยึดใต้โดรน
+    \item บินโดรนขึ้นไปลอยตัวเหนือยอดไม้ เพื่อวัดระยะจากโดรนถึงยอดไม้ด้วยเซ็นเซอร์ VPS
+    \item รักษาระดับความสูงเดิม และเคลื่อนที่ในแนวราบเพื่อจัดตำแหน่งให้เหมาะสมสำหรับการวัดระยะด้วย UWB
+    \item ทำการวัดระยะระหว่าง Tag และ Anchor ด้วยเทคนิค ToF
+    \item บันทึกข้อมูลระยะทางทั้งหมดลงในระบบ
+    \item ประมวลผลภาพถ่ายด้วย WebODM เพื่อสร้าง 3D Point Cloud
+    \item คำนวณความสูงของต้นไม้จากทั้งสองวิธี
+    \item เปรียบเทียบผลลัพธ์เพื่อประเมินความแม่นยำของระบบ
+\end{enumerate}
+
+\section{วิธีการคำนวณความสูงของต้นไม้}
+
+\subsection{การคำนวณจาก UWB และ VPS}
+
+ความสูงของต้นไม้สามารถประมาณได้จากผลต่างของระยะทางที่วัดได้จากระบบ UWB และเซ็นเซอร์ VPS ดังสมการ
+
+\begin{equation}
+H_{tree} = D_{UWB} - D_{VPS}
+\end{equation}
+
+โดยที่
+
+\begin{itemize}
+    \item $H_{tree}$ คือ ความสูงของต้นไม้
+    \item $D_{UWB}$ คือ ระยะห่างระหว่าง Tag และ Anchor
+    \item $D_{VPS}$ คือ ระยะจากโดรนถึงยอดไม้
+\end{itemize}
+
+\subsection{การคำนวณความสูงจากแบบจำลองสามมิติ}
+ความสูงของต้นไม้จากแบบจำลองสามมิติถูกวัดโดยใช้เครื่องมือวัดระยะภายในซอฟต์แวร์ WebODM ซึ่งอาศัยข้อมูลจาก 3D Point Cloud ที่สร้างขึ้นจากภาพถ่ายทางอากาศ โดยทำการเลือกจุดที่แทนตำแหน่งยอดไม้ และจุดที่แทนระดับพื้นดิน จากนั้นคำนวณระยะห่างในแนวดิ่งระหว่างสองจุดดังกล่าวเพื่อประมาณค่าความสูงของต้นไม้
